@@ -4,6 +4,15 @@ author: Adomas
 date: 2014-11-21
 autosize: true
 
+Plan of workshop
+========================================================
+
+- Homework solutions
+- Why and why not `data.table`?
+- Notations of `data.table` compared to SQL
+- Keys
+- Randomize a million rows data set
+
 Homework solutions
 ========================================================
 
@@ -11,3 +20,141 @@ Solutions to **optional** ``dplyr`` homework could be found [here on Github.](ht
 
 ![alt text](HW.gif)
 
+
+Why data.table?
+========================================================
+
+- `data.table` allows to play with enormous data sets, we are turning into *gigabytes level* from now on
+- `data.table` works [**insanely** fast](https://github.com/Rdatatable/data.table/wiki/Benchmarks-%3A-Grouping)
+- It could be combined with `dplyr` for convenient analysis
+- It has excellent, fast and friendly file reader `fread`
+
+Why not data.table?
+=========================================================
+
+- Extremely steep learning curve
+- Code is harder to read when applying more sophisticated functions
+
+
+One can choose what to use for particular tasks. 
+
+Although, in overall analysis **I** am more likely to combine `data.table` and `dplyr`. 
+
+It is up to **You**, what to use, but always try to make your code: **friendly**, **fast**, **reproducible** and **readable**.
+
+data.table in SQL terms
+=======================================================
+
+Say ``DT`` is any ``data.table``. Each `data.table` has the following syntax of most important arguments:
+
+
+```r
+DT[i, j, by]
+```
+
+Which can be translated in SQL terms
+
+
+```r
+DT[WHERE, SELECT|UPDATE, GROUP BY]
+```
+
+Though ```i, j``` in `data.frame` are indeces, but in  `data.table` -- condition and column name.
+
+Keys
+=====================================================
+
+In ``data.table`` new notation called `key` appears.
+
+One or more ``data.table`` columns could be keys.
+
+Keys could be interpreted as additional column names, but we will not consider this anymore. More info could be found [here on the first chapter.](http://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.pdf)
+
+
+However, we will show how to use keys for fast table joins.
+
+
+Data set
+=====================================================
+
+We will randomized data set with million of rows. It will be fictional sales data of fictional groceries store by fictional characters in fictional world.
+
+But first load `data.table` library:
+
+
+
+```r
+library(data.table)
+```
+
+In case you do not have it yet, let remind you:
+
+
+```r
+install.packages("data.table")
+```
+
+Fictionalicous data set
+================================================
+
+
+```r
+set.seed(1234)
+data <- data.table(name=paste0(sample(letters, 10e5, replace = TRUE), sample(letters, 10e5, replace = TRUE)),
+                   hour = round(runif(n = 10e5, min = 0,max = 23)),
+                   minute = round(runif(n = 10e5, min = 1,max = 60)),
+                   items = rpois(n = 10e5, lambda = 5),
+                   sales = rpois(n = 10e5, lambda = 5)*rpois(n = 10e5, lambda = 10),
+                   discount = round(runif(n = 10e5, min = 0, max = 0.7), 2))
+```
+
+Data set overview
+===============================================
+
+`data.table` is clever enough to print only few lines if asked, therefore we can see first and last 5 rows of data set by
+
+
+```r
+data
+```
+
+Sometimes we want to short summary about our tables, which we have in enviroment rigth now, thus it can be done by
+
+
+```r
+tables()
+```
+
+We can see name, number of rows, size of table in MB, column names and keys
+
+Selecting 
+===============================================
+
+Selecting in `data.table` is second argument. Moreover, as in `dplyr` selection by column names is by default.
+
+Though to select one column as vector, *eg*, names column
+
+
+```r
+data[, name]
+```
+
+However, if we want it select as `data.table`
+
+
+```r
+data[, list(name)]
+```
+
+Selecting 2
+==============================================
+title: FALSE
+
+In case we want to select few columns, *eg* hour and minute of purchase, then
+
+
+```r
+data[, list(hour, minute)]
+```
+
+**TASK:** Firstly, select discount as numeric vector and then as `data.table` object
