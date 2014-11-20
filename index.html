@@ -797,9 +797,11 @@ hljs.initHighlightingOnLoad();
 <ul>
 <li>Homework solutions</li>
 <li>Why and why not <code>data.table</code>?</li>
-<li>Notations of <code>data.table</code> compared to SQL</li>
-<li>Keys</li>
+<li>Notations of <code>data.table</code> in SQL terms</li>
 <li>Randomize a million rows data set</li>
+<li>Additional functions</li>
+<li><code>fread</code> and fast joining</li>
+<li>HW</li>
 </ul>
 
 </div>
@@ -864,20 +866,6 @@ hljs.initHighlightingOnLoad();
 
 </section>
 <section data-transition="linear" data-transition-speed="default">
-<h3>Keys</h3>
-<div class="slideContent" >
-<p>In <code>data.table</code> new notation called <code>key</code> appears.</p>
-
-<p>One or more <code>data.table</code> columns could be keys.</p>
-
-<p>Keys could be interpreted as additional column names, but we will not consider this anymore. More info could be found <a href="http://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.pdf">here on the first chapter.</a></p>
-
-<p>However, we will show how to use keys for fast table joins.</p>
-
-</div>
-
-</section>
-<section data-transition="linear" data-transition-speed="default">
 <h3>Data set</h3>
 <div class="slideContent" >
 <p>We will randomized data set with million of rows. It will be fictional sales data of fictional groceries store by fictional characters in fictional world.</p>
@@ -918,7 +906,7 @@ data &lt;- data.table(name=paste0(sample(letters, 10e5, replace = TRUE), sample(
 <pre><code class="r">data
 </code></pre>
 
-<p>Sometimes we want to short summary about our tables, which we have in enviroment rigth now, thus it can be done by</p>
+<p>Sometimes we want to see short summary about our tables, which we have in enviroment rigth now, thus it can be done by</p>
 
 <pre><code class="r">tables()
 </code></pre>
@@ -955,6 +943,226 @@ data &lt;- data.table(name=paste0(sample(letters, 10e5, replace = TRUE), sample(
 </code></pre>
 
 <p><strong>TASK:</strong> Firstly, select discount as numeric vector and then as <code>data.table</code> object</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Conditioning</h3>
+<div class="slideContent" >
+<p>Condition should be added as first argument. If we want sales after after 20 hour</p>
+
+<pre><code class="r">data[hour &gt; 20, ]
+</code></pre>
+
+<p>And, moreover, excatly on 50th minute</p>
+
+<pre><code class="r">data[hour &gt; 20 &amp; minute == 50, ]
+</code></pre>
+
+<p>OR can be used with <code>|</code>.</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+
+<div class="slideContent noTitle" >
+<p>To select any columns with condition, just add coondition and state column name or names as second argument</p>
+
+<pre><code class="r">data[hour &gt; 20 &amp; minute == 50, list(sales)]
+</code></pre>
+
+<p>Note, that without <code>list()</code> we would get a numeric vector</p>
+
+<p><strong>TASK:</strong> Which persons and how many items bought on first two minutes of 5th hour without any discount?</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Group by</h3>
+<div class="slideContent" >
+<p>Group by is done by specifying additional argument <code>by</code> with one or more columns. </p>
+
+<p>Group by without applying any function doesn&#39;t make any sense, thus let&#39;s calculate each hour average sales</p>
+
+<pre><code class="r">data[, mean(sales), by=hour]
+</code></pre>
+
+<p>If we want additionally give a name to column</p>
+
+<pre><code class="r">data[, list(avgSales=mean(sales)), by=hour]
+</code></pre>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+
+<div class="slideContent noTitle" >
+<p>This could be extended to conditioning and different functions on different columns, moreover, grouping by different columns, for example, average sales and total items bought by cherry pickers during first two minutes of each hour</p>
+
+<pre><code class="r">data[minute &lt;= 2 &amp; discount &gt; 0.5, list(avgSales=mean(sales), sumItems=sum(items)), by=list(hour, minute)]
+</code></pre>
+
+<p><strong>TASK:</strong> How many items at maximum do cherry pickers (with discount bigger than 50%) buy and how much total sales generate during each minute of ten last minutes of an hour.</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Additional options: adding new columns</h3>
+<div class="slideContent" >
+<p>In case we would like to add additional column, <em>eg</em>, calculated discount value</p>
+
+<pre><code class="r">data[, discountValue:=sales*discount]
+</code></pre>
+
+<p>Or apply function over a column</p>
+
+<pre><code class="r">data[, discountValue:=round(discountValue, 1)]
+</code></pre>
+
+<p><strong>TASK:</strong> Add column where time of purchase would be written in seconds and call it <code>inSeconds</code></p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Additional options: slicing by indeces</h3>
+<div class="slideContent" >
+<p>If we want to select columns by indeces, then we additionally add argument <code>with=FALSE</code>. First two columns</p>
+
+<pre><code class="r">data[, 1:2, with=FALSE]
+</code></pre>
+
+<p>If we want select some rows by row index, indeces could be specified in <code>WHERE</code> or <code>i</code> argument, <em>eg</em>, 5 random rows of second and fourth column</p>
+
+<pre><code class="r">data[sample(10e5, 5), c(2, 4), with=FALSE]
+</code></pre>
+
+<p><strong>TASK:</strong> Select rows with indices of your year, month and day of birth of last two columns</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Additional options: setting names</h3>
+<div class="slideContent" >
+<p>In some situations we would like to change or set names to some or all columns of <code>data.table</code>. This can be done with <code>setnames()</code>, let&#39;s change <code>discountValue</code> to <code>discountAmount</code></p>
+
+<pre><code class="r">setnames(data, old = &#39;discountValue&#39;, new = &#39;discountAmount&#39;)
+</code></pre>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Additional options: keys</h3>
+<div class="slideContent" >
+<p>In <code>data.table</code> new notation called <code>key</code> appears.</p>
+
+<p>One or more <code>data.table</code> columns could be keys.</p>
+
+<p>Keys could be interpreted as additional column names, but we will not consider this anymore. More info could be found <a href="http://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.pdf">here on the first chapter.</a></p>
+
+<p>However, we will show how to use keys for fast table joins.</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Additional options: fread</h3>
+<div class="slideContent" >
+<p><code>fread</code> is fast and friendly file reader which detects controls automatically.</p>
+
+<p>Read accounts data</p>
+
+<pre><code class="r">accounts &lt;- fread(&quot;your/location/to/file/accounts_info.csv&quot;)
+</code></pre>
+
+<p>Take a look at data and tables in your enviroment right now</p>
+
+<pre><code class="r">accounts
+tables()
+</code></pre>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Additional options: joining</h3>
+<div class="slideContent" >
+<p>Say, <code>X</code> and <code>Y</code> are two <code>data.tables</code>, both of them have column named <code>z</code>, which is a key in both tables.</p>
+
+<p>Then joining <code>X</code> and <code>Y</code> on <code>z</code> could be done by</p>
+
+<pre><code class="r">X[Y]
+</code></pre>
+
+<p>Tables are always joined on keys, thus before joining keys must be set.</p>
+
+<p>Moreover, one can join on multiple keys.</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+
+<div class="slideContent noTitle" >
+<p>Assume, that each customer has unique name. Let&#39;s set <code>name</code> as keys in <code>data</code> and <code>accounts</code> <code>data.tables</code>.</p>
+
+<pre><code class="r">setkey(data, name)
+setkey(accounts, name)
+</code></pre>
+
+<p>Then to join both tables</p>
+
+<pre><code class="r">data[accounts]
+</code></pre>
+
+<p>One can see that table is sorted by key - <code>name</code> column.</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Homework data set</h3>
+<div class="slideContent" >
+<p>Fictional telco data</p>
+
+<pre><code class="r">set.seed(1234)
+homework &lt;- data.table(accountID = sample(round(runif(700)*10e6), 25e5, replace=TRUE),
+                       smsOut = round(abs(rnorm(25e5, 50, 100))),
+                       smsIn = round(abs(rnorm(25e5, 50, 100))),
+                       callsOut = round(abs(rnorm(25e5, 15, 20))),
+                       callsIn = round(abs(rnorm(25e5, 15, 20))))
+homework[, lifetime:=floor(accountID/10e3)]
+homework[, age:=ceiling(accountID/15e4)]
+</code></pre>
+
+<p>Don&#39;t forget to take a look at few lines and <code>tables()</code>!</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Homework tasks 1</h3>
+<div class="slideContent" >
+<p><strong>TASK 1:</strong> Select account IDs and calls outgoing of customers who are not adults yet</p>
+
+<p><strong>TASK 2:</strong> How much customers who are aged between 20 and 25 send sms and calls on average. Name these values as you want</p>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Homework tasks 2</h3>
+<div class="slideContent" >
+<p><strong>TASK 3:</strong> Assuming that SMS costs is 0.01 and minute of call costs 0.07, calculate spending and name it as <code>spending</code></p>
+
+<p><strong>TASK 4:</strong> Select unique accountID which spent less than 0.5 and lifetime is higher than 900 and print it in vector</p>
 
 </div>
 
