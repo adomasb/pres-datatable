@@ -11,7 +11,7 @@ Plan of workshop
 - Why and why not `data.table`?
 - Notations of `data.table` in SQL terms
 - Randomize a million rows data set
-- Additional functions
+- Additional operations
 - `fread` and fast joining
 - HW
 
@@ -66,7 +66,7 @@ Though ```i, j``` in `data.frame` are indeces, but in  `data.table` -- condition
 Data set
 =====================================================
 
-We will randomized data set with million of rows. It will be fictional sales data of fictional groceries store by fictional characters in fictional world.
+We will use randomized data set with million of rows. It will be fictional sales data of fictional groceries store by fictional characters in fictional world.
 
 But first load `data.table` library:
 
@@ -114,7 +114,7 @@ Sometimes we want to see short summary about our tables, which we have in enviro
 tables()
 ```
 
-We can see name, number of rows, size of table in MB, column names and keys
+We can see name, number of rows, size of table in MB, column names and keys.
 
 Selecting 
 ===============================================
@@ -139,7 +139,7 @@ Selecting 2
 ==============================================
 title: FALSE
 
-In case we want to select few columns, *eg* hour and minute of purchase, then
+In case we want to select few columns, *eg*, hour and minute of purchase, then
 
 
 ```r
@@ -231,7 +231,7 @@ Or apply function over a column
 data[, discountValue:=round(discountValue, 1)]
 ```
 
-**TASK:** Add column where time of purchase would be written in seconds and call it `inSeconds`
+**TASK:** Add column in which time of purchase would be written in seconds and call it `inSeconds`
 
 Additional options: slicing by indeces
 ==============================================
@@ -322,7 +322,7 @@ setkey(data, name)
 setkey(accounts, name)
 ```
 
-Then to join both tables
+Then join both tables
 
 
 ```r
